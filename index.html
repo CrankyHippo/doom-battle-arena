@@ -1,547 +1,561 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Battle Arena – A Doom Battle Sandbox</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta
-    name="description"
-    content="Battle Arena is a co-op sandbox level for Final Doom (TNT: Evilution), set in a UAC research facility with demons, bunkers and chaos."
-  />
-  <style>
-    :root {
-      --bg: #05060a;
-      --bg-alt: #0c1018;
-      --fg: #f5f5f5;
-      --accent: #ff4444;
-      --accent-soft: #ff8a4a;
-      --muted: #9ca3af;
-      --border: #1f2933;
-      --radius: 12px;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #111827 0, #020617 60%);
-      color: var(--fg);
-      line-height: 1.6;
-    }
-    a { color: var(--accent-soft); }
-    a:hover { color: var(--accent); }
-
-    header {
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(10px);
-      background: rgba(3, 7, 18, 0.9);
-    }
-    .nav-inner {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 0.75rem 1.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-    .logo {
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .logo-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 10px rgba(248, 113, 113, 0.9);
-    }
-    nav a {
-      margin-left: 1rem;
-      font-size: 0.9rem;
-      text-decoration: none;
-      color: var(--muted);
-    }
-    nav a:hover { color: var(--fg); }
-
-    main {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 2rem 1.25rem 4rem;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.3fr);
-      gap: 2.5rem;
-      padding: 3rem 0 2.5rem;
-      align-items: center;
-    }
-    @media (max-width: 800px) {
-      .hero { grid-template-columns: minmax(0, 1fr); }
-    }
-    .hero h1 {
-      font-size: clamp(2.2rem, 4vw, 3rem);
-      margin-bottom: 0.75rem;
-    }
-    .hero-sub {
-      color: var(--muted);
-      max-width: 38rem;
-      font-size: 0.98rem;
-    }
-    .tagline {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.2rem 0.65rem;
-      border-radius: 999px;
-      border: 1px solid rgba(248, 113, 113, 0.35);
-      background: rgba(15, 23, 42, 0.8);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--accent-soft);
-      margin-bottom: 0.75rem;
-    }
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 1.5rem;
-    }
-    .btn {
-      border-radius: 999px;
-      padding: 0.7rem 1.3rem;
-      border: 1px solid transparent;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
-      color: #111827;
-      font-weight: 600;
-      box-shadow: 0 0 30px rgba(248, 113, 113, 0.4);
-    }
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 0 38px rgba(248, 113, 113, 0.7);
-    }
-    .btn-ghost {
-      background: transparent;
-      color: var(--fg);
-      border-color: var(--border);
-    }
-    .btn-ghost:hover {
-      background: rgba(15, 23, 42, 0.9);
-      border-color: rgba(148, 163, 184, 0.6);
-    }
-    .hero-card {
-      border-radius: 18px;
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      background: radial-gradient(circle at top left, #111827, #020617);
-      padding: 1rem;
-      font-size: 0.8rem;
-      color: var(--muted);
-      display: grid;
-      gap: 0.75rem;
-    }
-    .hero-card h2 {
-      margin: 0;
-      font-size: 0.95rem;
-      color: var(--fg);
-    }
-    .hero-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      font-size: 0.75rem;
-    }
-    .pill {
-      padding: 0.15rem 0.55rem;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.9);
-    }
-
-    section {
-      margin-top: 3rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(15, 23, 42, 0.9);
-    }
-    section h2 {
-      font-size: 1.35rem;
-      margin-bottom: 0.5rem;
-    }
-    .section-sub {
-      font-size: 0.9rem;
-      color: var(--muted);
-      margin-bottom: 1.5rem;
-      max-width: 40rem;
-    }
-    .two-col {
-      display: grid;
-      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.1fr);
-      gap: 2rem;
-    }
-    @media (max-width: 800px) {
-      .two-col { grid-template-columns: minmax(0, 1fr); }
-    }
-    .card {
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: linear-gradient(145deg, rgba(15,23,42,0.9), rgba(15,23,42,0.4));
-      padding: 1rem 1.1rem;
-      font-size: 0.9rem;
-    }
-    .card h3 {
-      margin-top: 0;
-      font-size: 1rem;
-    }
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-      margin-bottom: 0.5rem;
-    }
-    .pill-sm {
-      font-size: 0.7rem;
-      padding: 0.1rem 0.5rem;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      color: var(--muted);
-    }
-    ul {
-      padding-left: 1.1rem;
-      margin-top: 0.2rem;
-    }
-    li { margin-bottom: 0.25rem; }
-
-    .map-wrapper {
-      border-radius: var(--radius);
-      border: 1px dashed rgba(148,163,184,0.5);
-      padding: 1rem;
-      font-size: 0.85rem;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 1.5rem 1.25rem 2rem;
-      font-size: 0.8rem;
-      color: var(--muted);
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="nav-inner">
-      <div class="logo">
-        <span class="logo-dot"></span>
-        BATTLE ARENA
-      </div>
-      <nav>
-        <a href="#story">Story</a>
-        <a href="#how-to-play">How to Play</a>
-        <a href="#map">Map</a>
-        <a href="#downloads">Downloads</a>
-        <a href="#credits">Credits</a>
-      </nav>
-    </div>
-  </header>
-
-  <main>
-    <!-- HERO -->
-    <section class="hero" id="top">
-      <div>
-        <div class="tagline">UAC Research Facility • Co-op Doom Sandbox</div>
-        <h1>Battle Arena for Final Doom</h1>
-        <p class="hero-sub">
-          Battle Arena is a single-level modification for <strong>Final Doom: TNT – Evilution</strong>,
-          built as a long-form co-op playground. Defend a UAC research facility, hold the bunkers,
-          unleash demons from the BRIG, and role-play Marines, workers, or SWAT during outbreak scenarios.
-        </p>
-        <div class="hero-actions">
-          <!-- TODO: point href to your BA.WAD in the repo -->
-          <a class="btn btn-primary" href="BA.WAD" download>
-            Download BA.WAD
-            <span>⇩</span>
-          </a>
-          <a class="btn btn-ghost" href="#downloads">
-            Setup & Requirements
-          </a>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Battle Arena - A Doom Battle Sandbox</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Battle Arena is a co-op sandbox level for Doom (TNT: Evilution), set in a UAC research facility with demons, bunkers and chaos."
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="nav-inner">
+        <div class="logo">
+          <span class="logo-dot"></span>
+          BATTLE ARENA
         </div>
+        <nav>
+          <a href="#story">Story</a>
+          <a href="#how-to-play">How to Play</a>
+          <a href="#map">Map</a>
+          <a href="#downloads">Downloads</a>
+          <a href="#credits">Credits</a>
+        </nav>
       </div>
-      <aside class="hero-card">
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section class="hero" id="top">
         <div>
-          <h2>Quick Facts</h2>
-          <div class="hero-meta">
-            <span class="pill">Engine: Doom (TNT.WAD)</span>
-            <span class="pill">Mode: Co-op sandbox</span>
-            <span class="pill">Players: 2–4+</span>
+          <div class="tagline">UAC Research Facility • Co-op Doom Sandbox</div>
+          <h1>Battle Arena for DooM</h1>
+          <p class="hero-sub">
+            Battle Arena is a single-level modification for
+            <strong>DooM</strong>, built as a long-form co-op playground. Defend
+            a UAC research facility, hold the bunkers, u nleash demons from the
+            BRIG, and role-play Marines, workers, or SWAT during outbreak
+            scenarios.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="assets/files/BA.wad" download>
+              Download BA.WAD
+              <span>⇩</span>
+            </a>
+            <a class="btn btn-ghost" href="#downloads">
+              Setup & Requirements
+            </a>
           </div>
         </div>
-        <div>
-          <strong>Recommended setup</strong>
-          <ul>
-            <li>Final Doom: <em>TNT: Evilution</em> (TNT.WAD)</li>
-            <li><a href="https://sourceforge.net/projects/doomlegacy/" target="_blank">Doom Legacy</a> as source port</li>
-            <li><a href="http://www.doomconnector.org/" target="_blank">Doom Connector</a> for online lobbies</li>
-          </ul>
-        </div>
-        <div>
-          <strong>Designed for</strong>
-          <ul>
-            <li>Endless demon waves in the Arena</li>
-            <li>Scripted “workday gone wrong” scenarios</li>
-            <li>Light role-play & emergent chaos</li>
-          </ul>
-        </div>
-      </aside>
-    </section>
-
-    <!-- STORY & ORIGINS -->
-    <section id="story">
-      <h2>Story & Origins</h2>
-      <p class="section-sub">
-        Battle Arena exists both as an in-universe UAC black-ops facility and as a passion project built
-        over years of late-night Doom co-op. This section covers both sides of that story.
-      </p>
-
-      <div class="two-col">
-        <div class="card">
-          <h3>In-Universe: UAC Battle Research Center</h3>
-          <p>
-            The Battle Arena is a secret Union Aerospace Corporation complex on Earth. Its purpose:
-            capture and study creatures discovered via ancient teleporters on Mars’ moons – then throw
-            elite Marines at them until someone learns something or dies trying.
-          </p>
-          <p>
-            The facility is split between a biological research wing – packed with caged monsters – and
-            the Arena itself, where live-fire tests pit Marines against demonic hordes. Safety is
-            “a top priority”, at least according to the welcome briefing you get before stepping into a
-            building full of teleporters, experimental power systems, and a room literally called the BRIG.
-          </p>
-        </div>
-        <div class="card">
-          <h3>Real-World: Two High-School Doom Nerds</h3>
-          <p>
-            Battle Arena started life around 2002–2004 when Alex “Anelf3” Gumpel and Bryan
-            “CrankyHippo” Burnett tried to recreate their favorite Doom II memory:
-            sprinting past a Cyberdemon that slowly crept closer to the spawn every time they died.
-          </p>
-          <p>
-            The original prototype was just a giant pit full of Cyberdemons and a central bunker. From there
-            the level grew organically: control room, exterior courtyard, BRIG, armory, med bay, maintenance
-            shafts, and a spawn zone where players choose how to enter the map.
-          </p>
-          <p>
-            The user’s guide was written so people wouldn’t just load BA as a normal map, beat it, and move on.
-            It’s meant to be a sandbox you live in for a while.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- HOW TO PLAY -->
-    <section id="how-to-play">
-      <h2>How to Play & Roles</h2>
-      <p class="section-sub">
-        Battle Arena shines when players adopt loose roles and lean into the scenarios:
-        a normal day at work, sudden containment failures, and full-scale demon outbreaks.
-      </p>
-
-      <div class="two-col">
-        <div class="card">
-          <h3>Requirements & Setup</h3>
-          <ul>
-            <li><strong>Base game:</strong> Final Doom – TNT: Evilution (<code>TNT.WAD</code>)</li>
-            <li><strong>PWAD:</strong> <code>BA.WAD</code> (this map)</li>
-            <li><strong>Recommended port:</strong> Doom Legacy (Software renderer, MIDI disabled)</li>
-            <li><strong>Recommended lobby:</strong> Doom Connector for easy multiplayer rooms</li>
-          </ul>
-          <p><strong>Typical multiplayer setup (Doom Legacy/Doom Connector):</strong></p>
-          <ul>
-            <li>Game mode: <em>Cooperative</em></li>
-            <li>Skill: <em>Nightmare</em> (for the intended chaos)</li>
-            <li>Team damage: <em>On</em> (friendly fire is part of the fun)</li>
-            <li>Additional file: <code>BA.WAD</code></li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h3>Roles</h3>
-          <div class="pill-row">
-            <span class="pill-sm">Marine (Gray)</span>
-            <span class="pill-sm">Worker / Scientist</span>
-            <span class="pill-sm">SWAT (Red)</span>
+        <aside class="hero-card">
+          <div>
+            <h2>Quick Facts</h2>
+            <div class="hero-meta">
+              <span class="pill">Engine: Doom (TNT.WAD)</span>
+              <span class="pill">Mode: Co-op sandbox</span>
+              <span class="pill">Players: 2-4+</span>
+            </div>
           </div>
+          <div>
+            <strong>Recommended setup</strong>
+            <ul>
+              <li>Final Doom: <em>TNT: Evilution</em> (TNT.WAD)</li>
+              <li>
+                <a
+                  href="https://sourceforge.net/projects/doomlegacy/"
+                  target="_blank"
+                  >Doom Legacy</a
+                >
+                as source port
+              </li>
+              <li>
+                <a href="https://mrrocket.github.io/DC-Site/" target="_blank"
+                  >Doom Connector</a
+                >
+                for online lobbies
+              </li>
+            </ul>
+          </div>
+          <div>
+            <strong>Designed for</strong>
+            <ul>
+              <li>Endless demon waves in the Arena</li>
+              <li>Scripted “workday gone wrong” scenarios</li>
+              <li>Light role-play & emergent chaos</li>
+            </ul>
+          </div>
+        </aside>
+      </section>
+
+      <!-- STORY & ORIGINS -->
+      <section id="story">
+        <h2>Story & Origins</h2>
+        <p class="section-sub">
+          Battle Arena exists both as an in-universe UAC black-ops facility and
+          as a passion project built over years of late-night Doom co-op. This
+          section covers both sides of that story.
+        </p>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>In-Universe: UAC Battle Research Center</h3>
+            <p>
+              The Battle Arena is a secret Union Aerospace Corporation complex
+              on Earth. Its purpose: capture and study creatures discovered via
+              ancient teleporters on Mars' moons then throw elite Marines at
+              them until someone learns something or dies trying.
+            </p>
+            <p>
+              The facility is split between a biological research wing, packed
+              with caged monsters and the Arena itself, where live-fire tests
+              pit Marines against demonic hordes. Safety is “a top priority”, at
+              least according to the welcome briefing you get before stepping
+              into a building full of teleporters, experimental power systems,
+              and a room filled to the brim with monsters. What could possibly
+              go wrong?
+            </p>
+          </div>
+          <div class="card">
+            <h3>Real-World: Two High-School Doom Nerds</h3>
+            <p>
+              Battle Arena started life around 2002-2004 when Alex “Anelf3”
+              Gumpel and Bryan “CrankyHippo” Burnett tried to recreate their
+              favorite Doom II memory: sprinting past a Cyberdemon that slowly
+              crept closer to the spawn every time they died.
+            </p>
+            <p>
+              The original prototype was just a giant pit full of Cyberdemons
+              and a central bunker. From there the level grew organically:
+              control room, exterior courtyard, brig, armory, med bay,
+              maintenance shafts, and a spawn zone where players choose how to
+              enter the map.
+            </p>
+            <p>
+              The user's guide was written so people wouldn't just load BA as a
+              normal map, beat it, and move on. It's meant to be a sandbox you
+              live in for a while.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- HOW TO PLAY -->
+      <section id="how-to-play">
+        <h2>How to Play & Roles</h2>
+        <p class="section-sub">
+          Battle Arena shines when players adopt loose roles and lean into the
+          scenarios: a normal day at work, sudden containment failures, and
+          full-scale demon outbreaks.
+        </p>
+
+        <div class="two-col">
+          <div class="card">
+            <h3>Requirements & Setup</h3>
+            <ul>
+              <li>
+                <strong>Base game:</strong> Final Doom - TNT: Evilution
+                (<code>TNT.WAD</code>)
+              </li>
+              <li><strong>PWAD:</strong> <code>BA.WAD</code> (this map)</li>
+              <li>
+                <strong>Recommended port:</strong> Doom Legacy (Software
+                renderer, MIDI disabled)
+              </li>
+              <li>
+                <strong>Recommended lobby:</strong> Doom Connector for easy
+                multiplayer rooms
+              </li>
+            </ul>
+            <p>
+              <strong
+                >Typical multiplayer setup (Doom Legacy/Doom Connector):</strong
+              >
+            </p>
+            <ul>
+              <li>Game mode: <em>Cooperative</em></li>
+              <li>Skill: <em>Nightmare</em> (for the intended chaos)</li>
+              <li>
+                Team damage: <em>On</em> (friendly fire is part of the fun)
+              </li>
+              <li>Additional file: <code>BA.WAD</code></li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>Roles</h3>
+            <div class="pill-row">
+              <span class="pill-sm">Marine (Gray)</span>
+              <span class="pill-sm">Worker / Scientist</span>
+              <span class="pill-sm">SWAT (Red)</span>
+            </div>
+            <ul>
+              <li>
+                <strong>Marines</strong> spawn at the front entrance or directly
+                in the Arena, gear up in the Armory, and fight demons until
+                they're out of blood or ammo. They're the stars of the show in
+                the Arena.
+              </li>
+              <li>
+                <strong>Workers / Scientists</strong> keep the place running:
+                starting at the entrance or Control Room, watching Marines from
+                behind glass, running to Engineering or Medical, or occasionally
+                picking up a gun when things go bad.
+              </li>
+              <li>
+                <strong>SWAT</strong> is only called when something has gone
+                very wrong: monsters loose in the corridors, a Marine snapping
+                into “space madness”, or a BRIG malfunction. They use a red
+                keycard to access a private SWAT entrance and high-speed
+                elevator into the maintenance shafts.
+              </li>
+            </ul>
+            <p
+              style="
+                font-size: 0.8rem;
+                color: var(--muted);
+                margin-top: 0.75rem;
+              "
+            >
+              House rule: to “use the map” or check cameras, you're supposed to
+              be standing in front of a computer screen in-game. It makes
+              getting lost in the maintenance shafts a lot more tense.
+            </p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem">
+          <h3>Scenarios</h3>
           <ul>
             <li>
-              <strong>Marines</strong> spawn at the front entrance or directly in the Arena, gear up in the Armory,
-              and fight demons until they’re out of blood or ammo. They’re the stars of the show in the Arena.
+              <strong>Normal Day at Work</strong> - Everyone spawns via the
+              front entrance, checks in at Security, hits the Armory, and then
+              activates the Arena from the main bunker. Retreat to Medical and
+              restock when needed.
             </li>
             <li>
-              <strong>Workers / Scientists</strong> keep the place running: starting at the entrance or Control Room,
-              watching Marines from behind glass, running to Engineering or Medical, or occasionally picking up a gun
-              when things go bad.
+              <strong>Containment Failure</strong> - The BRIG cells open and
+              demons spill into the main corridor. Workers dive into maintenance
+              shafts; Marines & SWAT scramble to seal the area and clear the
+              base.
             </li>
             <li>
-              <strong>SWAT</strong> is only called when something has gone very wrong: monsters loose in the corridors,
-              a Marine snapping into “space madness”, or a BRIG malfunction. They use a red keycard to access a private
-              SWAT entrance and high-speed elevator into the maintenance shafts.
+              <strong>Space Madness</strong> - One Marine “snaps” and becomes a
+              hostile player. Workers hide and track them on cameras while SWAT
+              hunts them through the shafts.
+            </li>
+            <li>
+              <strong>Cyberdemon Loose in the Base</strong> - Boss-tier
+              emergency. Bunkers, teleports, and SWAT entrance all come into
+              play while everyone tries not to get vaporized.
             </li>
           </ul>
-          <p style="font-size: 0.8rem; color: var(--muted); margin-top: 0.75rem;">
-            House rule: to “use the map” or check cameras, you’re supposed to be standing in front of a computer
-            screen in-game. It makes getting lost in the maintenance shafts a lot more tense.
+        </div>
+      </section>
+
+      <!-- MAP & LOCATIONS -->
+      <section id="map">
+        <h2>Level Map & Key Locations</h2>
+        <p class="section-sub">
+          Battle Arena is a loop of corridors, rooms, shafts and bunkers wrapped
+          around a central Arena.
+        </p>
+        <div class="map-wrapper">
+          <a
+            href="assets/photos/map_numbers.png"
+            target="_blank"
+            rel="noopener"
+          >
+            <img
+              src="assets/photos/map_numbers.png"
+              alt="Top-down map of the Battle Arena level showing the courtyard, base interior and central arena."
+              style="
+                max-width: 100%;
+                height: auto;
+                border-radius: 10px;
+                display: block;
+                margin: 0 auto 0.75rem;
+              "
+            />
+          </a>
+          <p style="font-size: 0.8rem">
+            Click the map to open a full-size version in a new tab. Use the
+            legend below to match rooms and routes.
           </p>
         </div>
-      </div>
 
-      <div class="card" style="margin-top: 1.5rem;">
-        <h3>Scenarios</h3>
-        <ul>
-          <li>
-            <strong>Normal Day at Work</strong> – Everyone spawns via the front entrance, checks in at Security, hits the
-            Armory, and then activates the Arena from the main bunker. Retreat to Medical and restock when needed.
-          </li>
-          <li>
-            <strong>Containment Failure</strong> – The BRIG cells open and demons spill into the main corridor.
-            Workers dive into maintenance shafts; Marines & SWAT scramble to seal the area and clear the base.
-          </li>
-          <li>
-            <strong>Space Madness</strong> – One Marine “snaps” and becomes a hostile player. Workers hide and track them on
-            cameras while SWAT hunts them through the shafts.
-          </li>
-          <li>
-            <strong>Cyberdemon Loose in the Base</strong> – Boss-tier emergency. Bunkers, teleports, and SWAT entrance all
-            come into play while everyone tries not to get vaporized.
-          </li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- MAP & LOCATIONS -->
-    <section id="map">
-      <h2>Level Map & Key Locations</h2>
-      <p class="section-sub">
-        Battle Arena is a loop of corridors, rooms, shafts and bunkers wrapped around a central Arena.
-        The original user’s guide ships with a top-down diagram – this section mirrors that legend so you can
-        build an annotated map image or interactive SVG later.
-      </p>
-
-      <div class="map-wrapper">
-        <!-- TODO: Replace this with an actual image or SVG of your map -->
-        <p><strong>Map Placeholder</strong></p>
-        <p>
-          Drop a screenshot or hand-drawn layout of the level here. Number the areas (1–21) to match
-          the legend below and hook up hover/click tooltips if you want.
-        </p>
-      </div>
-
-      <div class="two-col" style="margin-top: 1.5rem;">
-        <div class="card">
+        <div class="cardl" style="margin-top: 1.5rem">
           <h3>Base & Infrastructure</h3>
           <ul>
-            <li><strong>Spawn Area</strong> – Purgatory room with teleporters: front entrance, Control Room, or straight into the Arena.</li>
-            <li><strong>Courtyard & Main Entrance Gate</strong> – Exterior area with a fountain and benches; the “normal” way into work at BA.</li>
-            <li><strong>Security Checkpoint & Elevator</strong> – Main vertical access; baggage scans, sign-in, and weapon checks.</li>
-            <li><strong>Main Corridor</strong> – Central hallway linking all major rooms. Each door has its own symbol for quick identification.</li>
-            <li><strong>Control Room</strong> – Overlooks the Arena; monitors Marine vitals, power, and security. Contains BRIG release switches and an emergency drop into the Arena.</li>
-            <li><strong>Engineering</strong> – Power systems and control panels that keep the facility and Arena running.</li>
-            <li><strong>Maintenance Shafts</strong> – Narrow back-corridors behind every room. Monsters can’t fit; humans can. Perfect for shortcuts and escape routes.</li>
-            <li><strong>Emergency Exit</strong> – Theoretical route out of the level, optionally disabled in multiplayer settings.</li>
+            <li>
+              <strong>01. Spawn Area</strong> – Purgatory room with teleporters
+              to multiple entry points.
+            </li>
+            <li>
+              <strong>02. Main Entrance Gate</strong> – The exterior front gate
+              of the facility.
+            </li>
+            <li>
+              <strong>03. Courtyard</strong> – Outdoor plaza with benches and
+              fountain area.
+            </li>
+            <li>
+              <strong>04. Main Entrance Elevator</strong> – Primary vertical
+              lift into the base.
+            </li>
+            <li>
+              <strong>05. Security Checkpoint</strong> – Screening and sign-in
+              area for personnel.
+            </li>
+            <li>
+              <strong>06. Main Corridor</strong> – Central hallway connecting
+              major rooms and facilities.
+            </li>
+            <li>
+              <strong>07. SWAT Emergency Entrance</strong> – Restricted entry
+              point for red-key SWAT access.
+            </li>
+            <li>
+              <strong>08. SWAT Entrance Elevator</strong> – High-speed lift
+              directly into maintenance shafts.
+            </li>
+            <li>
+              <strong>09. Maintenance Shafts</strong> – Narrow back-routes used
+              for escape and shortcuts.
+            </li>
+            <li>
+              <strong>10. Control Room</strong> – Oversees Arena operations,
+              security systems, and BRIG release.
+            </li>
+            <li>
+              <strong>11. Brig</strong> – Containment area for captured demons
+              (“pigs”).
+            </li>
+            <li>
+              <strong>12. Armory</strong> – Weapon, ammo, and armor supply
+              depot.
+            </li>
+            <li>
+              <strong>13. Medbay</strong> – Healing and medical support area for
+              Marines.
+            </li>
+            <li>
+              <strong>14. Engineering</strong> – Power systems, generators, and
+              facility controls.
+            </li>
+            <li>
+              <strong>15. Teleporter Room</strong> – Network of teleport pads
+              linking key map areas.
+            </li>
+            <li>
+              <strong>16. Empty Room</strong> – Unfinished expansion space
+              within the complex.
+            </li>
+            <li>
+              <strong>17. Arena Elevators</strong> – Lifts that descend into the
+              main Arena floor.
+            </li>
+            <li>
+              <strong>18. Arena</strong> – Primary combat zone for demon waves
+              and scenarios.
+            </li>
+            <li>
+              <strong>19. Corner Bunks</strong> – Small defensive bunkers
+              positioned around the Arena.
+            </li>
+            <li>
+              <strong>20. Main Bunker</strong> – Central fortified structure
+              with controls and supplies.
+            </li>
+            <li>
+              <strong>21. Emergency Exit</strong> – Theoretical escape route out
+              of the facility.
+            </li>
           </ul>
         </div>
+      </section>
+
+      <!-- MEDIA -->
+      <section id="media">
+        <h2>Media & Gameplay</h2>
+        <p class="section-sub">
+          A glimpse inside the Battle Arena facility: from the quiet UAC lobby
+          to full-blown containment failure in the corridors.
+        </p>
+
+        <div class="two-col">
+          <!-- Left: YouTube thumbnail -->
+          <div class="card">
+            <h3>Battle Arena Co-op Gameplay</h3>
+            <p style="font-size: 0.9rem; color: var(--muted)">
+              A play session of Battle Arena with friends, showing role-play,
+              base life, and escalating demon outbreaks.
+            </p>
+            <a
+              class="video-thumb"
+              href="https://www.youtube.com/watch?v=dhNFoDpc62I"
+              target="_blank"
+              rel="noopener"
+            >
+              <img
+                src="https://img.youtube.com/vi/dhNFoDpc62I/maxresdefault.jpg"
+                alt="Battle Arena co-op gameplay thumbnail"
+              />
+            </a>
+          </div>
+
+          <!-- Right: Screenshot gallery -->
+          <div class="card">
+            <h3>Screenshot Gallery</h3>
+            <div class="gallery">
+              <button
+                class="gallery-btn gallery-prev"
+                type="button"
+                aria-label="Previous screenshot"
+              >
+                ‹
+              </button>
+              <div class="gallery-track">
+                <img
+                  class="gallery-slide active"
+                  src="assets/photos/DOOM0006.png"
+                  alt="Three marines standing at the UAC spawn entrance in Battle Arena."
+                />
+                <img
+                  class="gallery-slide"
+                  src="assets/photos/DOOM0059.png"
+                  alt="Control room full of workers monitoring the Battle Arena."
+                />
+                <img
+                  class="gallery-slide"
+                  src="assets/photos/DOOM0090.png"
+                  alt="Blue-armored marines firing into the BRIG full of demons."
+                />
+                <img
+                  class="gallery-slide"
+                  src="assets/photos/DOOM0109.png"
+                  alt="Arena combat with monsters attacking through a viewing window."
+                />
+                <img
+                  class="gallery-slide"
+                  src="assets/photos/DOOM0158.png"
+                  alt="Demon chasing marines through the main corridor filled with bodies."
+                />
+              </div>
+              <button
+                class="gallery-btn gallery-next"
+                type="button"
+                aria-label="Next screenshot"
+              >
+                ›
+              </button>
+            </div>
+            <p
+              style="
+                font-size: 0.8rem;
+                color: var(--muted);
+                margin-top: 0.75rem;
+              "
+            >
+              Screenshots captured in Doom with BA.WAD loaded on top of TNT:
+              Evilution.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- DOWNLOADS -->
+      <section id="downloads">
+        <h2>Downloads & Assets</h2>
+        <p class="section-sub">
+          Everything you need to run Battle Arena. Final Doom itself is still
+          commercial software - you'll need to acquire TNT: Evilution legally.
+        </p>
+
         <div class="card">
-          <h3>Combat Zones & Bunkers</h3>
+          <h3>Mod Files</h3>
           <ul>
-            <li><strong>BRIG</strong> – Holding pens for “pig” demons used for research and as a source of monsters during outbreaks.</li>
-            <li><strong>Armory</strong> – Wall-to-wall guns, ammo, armor and maps. Standard stop before entering the Arena.</li>
-            <li><strong>Medical Bay</strong> – Where badly wounded Marines get patched up between rounds.</li>
-            <li><strong>Teleporter Room</strong> – Teleport pads to key areas and corner bunkers. Great for fast insertions; risky if someone is standing on the destination pad.</li>
-            <li><strong>Spare Room</strong> – Unfinished expansion space, rumored to be a future mess hall.</li>
-            <li><strong>The Arena & Elevators</strong> – Main kill zone where demons are released and Marines fight for as long as they can.</li>
-            <li><strong>Main Bunker</strong> – Central fortified structure inside the Arena. Has shutters, shield controls, a medkit and a teleporter back to base.</li>
-            <li><strong>Corner Bunkers</strong> – Four smaller bunkers scattered around the Arena. Good for catching your breath, not great for long sieges.</li>
-            <li><strong>SWAT Emergency Entrance & Elevator</strong> – Red-key-only access point with a high-speed lift straight into the maintenance shafts for SWAT teams.</li>
+            <li>
+              <strong>BA.WAD</strong> - The Battle Arena level.<br />
+              <a href="assets/files/BA.wad" download>Download BA.WAD</a>
+              (place alongside <code>TNT.WAD</code> in your Doom Legacy folder).
+            </li>
+            <li>
+              <strong>Battle Arena User's Guide (PDF)</strong> - Original manual
+              with full setup instructions and diagrams.<br />
+              <a href="assets/files/BAusersguide.pdf" download
+                >Download BA User's Guide</a
+              >
+            </li>
           </ul>
+          <p style="font-size: 0.85rem; color: var(--muted)">
+            Note: Battle Arena requires <code>TNT.WAD</code> from Final Doom.
+            This file is not included and must be purchased separately via a
+            legitimate source (e.g., Steam, GOG).
+          </p>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- DOWNLOADS -->
-    <section id="downloads">
-      <h2>Downloads & Assets</h2>
-      <p class="section-sub">
-        Everything you need to run Battle Arena. Final Doom itself is still commercial software – you’ll need
-        to acquire TNT: Evilution legally.
-      </p>
-
-      <div class="card">
-        <h3>Mod Files</h3>
-        <ul>
-          <li>
-            <strong>BA.WAD</strong> – The Battle Arena level.<br />
-            <a href="BA.WAD" download>Download BA.WAD</a> (place alongside <code>TNT.WAD</code> in your Doom Legacy folder).
-          </li>
-          <!-- If you want, add a link to the PDF here too -->
-          <li>
-            <strong>Battle Arena User’s Guide (PDF)</strong> – Original manual with full setup instructions and diagrams.<br />
-            <a href="BAusersguide.pdf" download>Download BA User’s Guide</a>
-          </li>
-        </ul>
-        <p style="font-size: 0.85rem; color: var(--muted);">
-          Note: Battle Arena requires <code>TNT.WAD</code> from Final Doom. This file is not included and must be
-          purchased separately via a legitimate source (e.g., Steam, GOG).
+      <!-- CREDITS -->
+      <section id="credits">
+        <h2>Credits & Contact</h2>
+        <p class="section-sub">
+          Battle Arena and this guide were created by Worldwide Cake. If you
+          enjoy the map or want to help with the Doom 3 version, reach out!
         </p>
-      </div>
-    </section>
 
-    <!-- CREDITS -->
-    <section id="credits">
-      <h2>Credits & Contact</h2>
-      <p class="section-sub">
-        Battle Arena and this guide were created by Worldwide Cake. If you enjoy the map or want to help with
-        the Doom 3 version, reach out!
-      </p>
+        <div class="card">
+          <h3>Worldwide Cake</h3>
+          <ul>
+            <li>Alex “Anelf3” Gumpel - Lead Designer & Chief Jerkface</li>
+            <li>Bryan “CrankyHippo” Burnett - VP of Conceptual Design</li>
+            <li>Derek “Gorden” Bowker - VP of Scientific Endeavors</li>
+            <li>George “Niatona” Pryor - VP of Foreign Affairs</li>
+          </ul>
+          <p style="font-size: 0.85rem; color: var(--muted)">
+            Battle Arena © Worldwide Cake Association. BA.WAD and its
+            accompanying documentation may be redistributed with proper credit
+            and original notices intact. See the manual for full details.
+          </p>
+          <p style="font-size: 0.85rem; color: var(--muted)">
+            Modern contact & source:
+            <a href="https://github.com/USERNAME/REPO" target="_blank"
+              >GitHub project</a
+            >
+            (update this link).
+          </p>
+        </div>
+      </section>
+    </main>
 
-      <div class="card">
-        <h3>Worldwide Cake</h3>
-        <ul>
-          <li>Alex “Anelf3” Gumpel – Lead Designer & Chief Jerkface</li>
-          <li>Bryan “CrankyHippo” Burnett – VP of Conceptual Design</li>
-          <li>Derek “Gorden” Bowker – VP of Scientific Endeavors</li>
-          <li>George “Niatona” Pryor – VP of Foreign Affairs</li>
-        </ul>
-        <p style="font-size: 0.85rem; color: var(--muted);">
-          Battle Arena © Worldwide Cake Association. BA.WAD and its accompanying documentation may be redistributed
-          with proper credit and original notices intact. See the manual for full details.
-        </p>
-        <!-- TODO: add your modern contact info / GitHub -->
-        <p style="font-size: 0.85rem; color: var(--muted);">
-          Modern contact & source: <a href="https://github.com/USERNAME/REPO" target="_blank">GitHub project</a> (update this link).
-        </p>
-      </div>
-    </section>
-  </main>
+    <footer>
+      UAC Battle Arena is a fan modification for Doom. Doom, Final Doom, and
+      related trademarks are property of their respective owners. This site is a
+      community project, not affiliated with id Software or Bethesda.
+    </footer>
 
-  <footer>
-    UAC Battle Arena is a fan modification for Doom. Doom, Final Doom, and related trademarks are property
-    of their respective owners. This site is a community project, not affiliated with id Software or Bethesda.
-  </footer>
-</body>
+    <script>
+      (function () {
+        const slides = Array.from(document.querySelectorAll(".gallery-slide"));
+        const prevBtn = document.querySelector(".gallery-prev");
+        const nextBtn = document.querySelector(".gallery-next");
+
+        if (!slides.length || !prevBtn || !nextBtn) return;
+
+        let index = 0;
+
+        function showSlide(i) {
+          index = (i + slides.length) % slides.length;
+          slides.forEach((slide, idx) => {
+            slide.classList.toggle("active", idx === index);
+          });
+        }
+
+        prevBtn.addEventListener("click", () => showSlide(index - 1));
+        nextBtn.addEventListener("click", () => showSlide(index + 1));
+      })();
+    </script>
+  </body>
 </html>
